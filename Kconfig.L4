@@ -6,10 +6,11 @@ config I2C_DRIVER_RPI4
 	help
 	  Include support for the Raspberry Pi 4 I2C controller.
 
-config I2C_DRIVER_IMX8
-	bool "i.MX8"
+config I2C_DRIVER_IMX21
+	bool "i.MX I2C (imx21 compatible)"
 	default y
 	help
-	  Include support for the i.MX8 I2C controller.
+	  Include support for the i.MX I2C controller (fsl,imx21-i2c and
+	  fsl,imx8mp-i2c), as found on the i.MX 8M family.
 
 endmenu

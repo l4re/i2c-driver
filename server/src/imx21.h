@@ -18,12 +18,12 @@
 #include <thread-l4>
 #include <cassert>
 
-namespace Imx8
+namespace Imx21
 {
 
-static Dbg warn() { return Dbg(Dbg::Warn, "IMX8"); }
-static Dbg info() { return Dbg(Dbg::Info, "IMX8"); }
-static Dbg trace() { return Dbg(Dbg::Trace, "IMX8"); }
+static Dbg warn() { return Dbg(Dbg::Warn, "IMX21"); }
+static Dbg info() { return Dbg(Dbg::Info, "IMX21"); }
+static Dbg trace() { return Dbg(Dbg::Trace, "IMX21"); }
 
 
 /**
@@ -139,11 +139,11 @@ struct Data_reg : Reg_data<0x10u, 0xffu>
 };
 
 
-/// i.MX8 I2C controller implementation
-class Ctrl_imx8 : public Ctrl_base
+/// i.MX I2C controller (imx21 compatible) implementation
+class Ctrl_imx21 : public Ctrl_base
 {
 public:
-  Ctrl_imx8() = default;
+  Ctrl_imx21() = default;
 
   bool probe(L4::Cap<L4vbus::Vbus> vbus, L4::Cap<L4::Icu> icu) override;
   char const *name() override { return _compatible[0]; }
@@ -274,7 +274,7 @@ private:
 
 
 void
-Ctrl_imx8::setup(L4Re::Util::Object_registry *)
+Ctrl_imx21::setup(L4Re::Util::Object_registry *)
 {
   L4Re::chksys(_irq->bind_thread(Pthread::L4::cap(pthread_self()), 0x1d07ca4e),
                "Failed to bind to controller IRQ to thread.");
@@ -289,7 +289,7 @@ Ctrl_imx8::setup(L4Re::Util::Object_registry *)
   reset(); // reset controller to start with a defined state.
 }
 
-void Ctrl_imx8::enable_ctrl()
+void Ctrl_imx21::enable_ctrl()
 {
   clear_status();
 
@@ -301,7 +301,7 @@ void Ctrl_imx8::enable_ctrl()
   _ctrl.print("ENABLE");
 }
 
-void Ctrl_imx8::reset()
+void Ctrl_imx21::reset()
 {
   _ctrl.ien() = 0;
   _ctrl.msta() = 0;
@@ -312,14 +312,14 @@ void Ctrl_imx8::reset()
   enable_ctrl();
 }
 
-void Ctrl_imx8::error_handler()
+void Ctrl_imx21::error_handler()
 {
   reset();
   clear_status();
 }
 
 bool
-Ctrl_imx8::process_irq(bool read, l4_uint8_t *byte, bool second_last, bool last)
+Ctrl_imx21::process_irq(bool read, l4_uint8_t *byte, bool second_last, bool last)
 {
   // Wait until transaction is finished.
   do
@@ -384,7 +384,7 @@ Ctrl_imx8::process_irq(bool read, l4_uint8_t *byte, bool second_last, bool last)
 }
 
 void
-Ctrl_imx8::gen_start(bool read, unsigned addr)
+Ctrl_imx21::gen_start(bool read, unsigned addr)
 {
   _ctrl.msta() = 1;
   _ctrl.mtx() = 1;
@@ -405,7 +405,7 @@ Ctrl_imx8::gen_start(bool read, unsigned addr)
 }
 
 long
-Ctrl_imx8::read(l4_uint16_t addr, l4_uint8_t *buf, unsigned len)
+Ctrl_imx21::read(l4_uint16_t addr, l4_uint8_t *buf, unsigned len)
 {
   info().printf("read %u bytes from 0x%x\n", len, addr);
 
@@ -460,7 +460,7 @@ Ctrl_imx8::read(l4_uint16_t addr, l4_uint8_t *buf, unsigned len)
 }
 
 long
-Ctrl_imx8::write(l4_uint16_t addr, l4_uint8_t const *buf, unsigned len)
+Ctrl_imx21::write(l4_uint16_t addr, l4_uint8_t const *buf, unsigned len)
 {
   info().printf("write %u bytes to 0x%x\n", len, addr);
   update_status();
@@ -508,7 +508,7 @@ Ctrl_imx8::write(l4_uint16_t addr, l4_uint8_t const *buf, unsigned len)
 }
 
 void
-Ctrl_imx8::alloc_ctrl_resources(L4::Cap<L4vbus::Vbus> vbus,
+Ctrl_imx21::alloc_ctrl_resources(L4::Cap<L4vbus::Vbus> vbus,
                                 L4::Cap<L4::Icu> icu,
                                 L4vbus::Device &dev,
                                 l4vbus_device_t &devinfo,
@@ -548,7 +548,7 @@ Ctrl_imx8::alloc_ctrl_resources(L4::Cap<L4vbus::Vbus> vbus,
 }
 
 bool
-Ctrl_imx8::probe(L4::Cap<L4vbus::Vbus> vbus, L4::Cap<L4::Icu> icu)
+Ctrl_imx21::probe(L4::Cap<L4vbus::Vbus> vbus, L4::Cap<L4::Icu> icu)
 {
   L4vbus::Device dev;
   l4vbus_device_t devinfo;
@@ -578,4 +578,4 @@ Ctrl_imx8::probe(L4::Cap<L4vbus::Vbus> vbus, L4::Cap<L4::Icu> icu)
   return true;
 }
 
-} // namespace Imx8
+} // namespace Imx21

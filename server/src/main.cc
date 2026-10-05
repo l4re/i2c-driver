@@ -20,15 +20,15 @@
 #include "debug.h"
 #include "controller.h"
 #include "bcm2835.h"
-#include "imx8.h"
+#include "imx21.h"
 
 // List of all supported controllers
 #ifdef CONFIG_I2C_DRIVER_RPI4
 static Ctrl_bcm2835 __bcm2835;
 #endif
 
-#ifdef CONFIG_I2C_DRIVER_IMX8
-static Imx8::Ctrl_imx8 __imx8;
+#ifdef CONFIG_I2C_DRIVER_IMX21
+static Imx21::Ctrl_imx21 __imx21;
 #endif
 
 // Pointer to active controller
